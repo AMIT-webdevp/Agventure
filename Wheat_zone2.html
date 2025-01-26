@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 1 - IoT Sensor Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://mvpfinalbuc.s3.us-east-1.amazonaws.com/Images/projectimages/village_farm.png'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            padding-top: 70px;
+        }
+
+        .navbar {
+            background: rgba(26, 37, 15, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar h1 {
+            font-size: 1.8rem;
+            color: #9fff97;
+            cursor: pointer;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .navbar li:hover {
+            color: #82ff62;
+        }
+
+        .info-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .chart-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .zone-button {
+            background-color: #82ff62;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+
+        .zone-button:hover {
+            background-color: #6ae34f;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Agventure</h1>
+        <ul>
+            <li onclick="navigateTo('index.html')">Home</li>
+            <li onclick="navigateTo('weather.html')">Weather</li>
+            <li onclick="navigateTo('log.html')">Log</li>
+        </ul>
+    </nav>
+
+    <div class="info-box">
+        <h2>Zone 2 - Data Visualization</h2>
+        <p>Displaying NPK, pH, and soil moisture data for Zone 2. Ensure optimal parameters for improved crop yield.</p>
+    </div>
+
+    <div class="button-container">
+        <button class="zone-button" onclick="navigateTo('Wheat_zone1.html')">Zone 1</button>
+        <button class="zone-button" onclick="navigateTo('Wheat_zone2.html')">Zone 2</button>
+        <button class="zone-button" onclick="navigateTo('Wheat_zone3.html')">Zone 3</button>
+    </div>
+
+    <div class="container">
+        <div class="chart-box">
+            <h2>NPK Levels</h2>
+            <canvas id="npkChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h2>Soil Moisture</h2>
+            <canvas id="soilMoistureChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h2>pH Level</h2>
+            <canvas id="phChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let lastScrollTop = 0;
+        const navbar = document.getElementById('navbar');
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navbar.classList.toggle('active');
+        }
+
+        // Detect scroll direction
+        window.onscroll = function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                navbar.style.top = "-70px"; // Hide navbar when scrolling down
+            } else {
+                navbar.style.top = "0"; // Show navbar when scrolling up
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }
+
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch('https://fwfoftwdef.execute-api.us-east-1.amazonaws.com/w2/w2', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const apiData = await response.json();
+                console.log('Fetched API data:', apiData);
+
+                // Parse the body field if it exists and is a string
+                const data = JSON.parse(apiData.body);
+
+                // Ensure data is an array before passing it to displayGraphs
+                if (Array.isArray(data)) {
+                    await displayGraphs(data);
+                } else {
+                    console.error('Data is not iterable. Expected an array:', data);
+                    alert('Invalid data format received.');
+                }
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                alert('Failed to load data. Please try again later.');
+            }
+        }
+
+        let npkChart, soilMoistureChart, phChart;
+
+        async function displayGraphs(data) {
+            const nitrogen = [];
+            const phosphorus = [];
+            const potassium = [];
+            const soilMoisture = [];
+            const pH = [];
+            const timestamps = [];
+
+            // Sort the data by Timestamp (assuming the Timestamp is in ISO format or a comparable string format)
+            data.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
+
+            const ctxNPK = document.getElementById('npkChart').getContext('2d');
+            const ctxSoilMoisture = document.getElementById('soilMoistureChart').getContext('2d');
+            const ctxPH = document.getElementById('phChart').getContext('2d');
+
+            npkChart = new Chart(ctxNPK, {
+                type: 'pie',
+                data: {
+                    labels: ['Nitrogen (N)', 'Phosphorus (P)', 'Potassium (K)'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 206, 86)']
+                    }]
+                }
+            });
+
+            soilMoistureChart = new Chart(ctxSoilMoisture, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Soil Moisture',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        fill: false
+                    }]
+                }
+            });
+
+            phChart = new Chart(ctxPH, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'pH Level',
+                        data: [],
+                        backgroundColor: 'rgb(153, 102, 255)'
+                    }]
+                }
+            });
+
+            // Loop through the sorted data and update the charts
+            for (const item of data) {
+                nitrogen.push(parseFloat(item.N));
+                phosphorus.push(parseFloat(item.P));
+                potassium.push(parseFloat(item.K));
+                soilMoisture.push(parseFloat(item.Soil_Moisture));
+                pH.push(parseFloat(item.pH));
+                timestamps.push(item.Timestamp);
+
+                // Update the NPK pie chart with the latest values (no accumulation)
+                npkChart.data.datasets[0].data = [
+                    nitrogen[nitrogen.length - 1], // Latest Nitrogen value
+                    phosphorus[phosphorus.length - 1], // Latest Phosphorus value
+                    potassium[potassium.length - 1] // Latest Potassium value
+                ];
+                npkChart.update();
+
+                soilMoistureChart.data.labels.push(item.Timestamp);
+                soilMoistureChart.data.datasets[0].data.push(parseFloat(item.Soil_Moisture));
+                soilMoistureChart.update();
+
+                phChart.data.labels.push(item.Timestamp);
+                phChart.data.datasets[0].data.push(parseFloat(item.pH));
+                phChart.update();
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+
+        // Fetch the data and display the charts when the page loads
+        window.onload = fetchData;
+    </script>
+</body>
+</html>

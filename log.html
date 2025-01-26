@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprinkler Log</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: #343a40;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+        }
+
+        .navbar li {
+            margin-left: 20px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .navbar li:hover {
+            color: #adb5bd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <h1>Sprinkler Log</h1>
+            <ul>
+                <li onclick="navigateTo('index.html')">Home</li>
+                <li onclick="navigateTo('weather.html')">Weather</li>
+                <li onclick="navigateTo('Soil_moisture.html')">Soil Moisture</li>
+                
+            </ul>
+        </nav>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Moisture Level</th>
+                <th>Sprinkler Action</th>
+            </tr>
+        </thead>
+        <tbody id="sprinklerLogBody">
+        </tbody>
+    </table>
+
+    <script>
+        let dataQueue = [];
+        let currentIndex = 0;
+
+        async function fetchAndUpdateLog() {
+            try {
+                const response = await fetch('https://jc72xdr32m.execute-api.us-east-1.amazonaws.com/demo/demo');
+                const jsonResponse = await response.json();
+                const data = jsonResponse.body ? JSON.parse(jsonResponse.body) : jsonResponse;
+
+                if (Array.isArray(data.data)) {
+                    dataQueue = data.data;
+
+                    const logBody = document.getElementById('sprinklerLogBody');
+                    while (currentIndex < dataQueue.length) {
+                        const entry = dataQueue[currentIndex];
+                        const timestamp = new Date(entry.Timestamp);
+                        const moisture = parseFloat(entry.Moisture);
+
+                        let action = '';
+                        if (moisture < 30) {
+                            action = 'Sprinkler ON';
+                        } else if (moisture > 70) {
+                            action = 'Sprinkler OFF';
+                        } else {
+                            action = 'No Action';
+                        }
+
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `<td>${timestamp}</td><td>${moisture}%</td><td>${action}</td>`;
+                        logBody.appendChild(newRow);
+
+                        currentIndex++;
+                    }
+                } else {
+                    console.error('Invalid data structure:', data);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        setInterval(() => {
+            if (currentIndex < dataQueue.length) {
+                fetchAndUpdateLog();
+            }
+        }, 2000);
+
+        fetchAndUpdateLog();
+    </script>
+    <script>
+        // Function to handle navigation
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+</script>    
+</body>
+</html>

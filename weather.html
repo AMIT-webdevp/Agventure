@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to right, #4CAF50, #2196F3);
+        }
+
+        .navbar {
+            width: 100%;
+            background: #343a40;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            height: 60px;
+            box-sizing: border-box;
+        }
+
+        .navbar h1 {
+            font-size: 22px;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin-left: 20px;
+            cursor: pointer;
+            transition: color 0.3s ease-in-out;
+            font-size: 16px;
+        }
+
+        .navbar li:hover {
+            color: #adb5bd;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .weather-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .weather-card:hover {
+            transform: scale(1.05);
+        }
+
+        #city-input {
+            padding: 12px 15px;
+            margin: 15px 0;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #city-input:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
+        #city-input::placeholder {
+            color: #aaa;
+        }
+
+        #city-input-btn {
+            padding: 12px 20px;
+            background-color: #2196F3;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #city-input-btn:hover {
+            background-color: #1565C0;
+        }
+
+        #weather-info {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #weather-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        #city-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        #temperature {
+            font-size: 26px;
+            font-weight: bold;
+            color: #FF5722;
+        }
+
+        #humidity,
+        #description,
+        #wind-speed,
+        #date {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <title>Weather Dashboard</title>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <h1>Weather Dashboard</h1>
+        <ul>
+            <li onclick="navigateTo('index.html')">Home</li>
+        </ul>
+    </div>
+
+    <!-- Weather Section -->
+    <div class="container">
+        <div class="weather-card">
+            <h1 style="color: #4CAF50;">Check Weather</h1>
+            <input type="text" id="city-input" placeholder="Enter city name">
+            <button id="city-input-btn" onclick="weatherFn($('#city-input').val())">
+                Get Weather
+            </button>
+            <div id="weather-info" class="animate__animated animate__fadeIn">
+                <h3 id="city-name"></h3>
+                <img id="weather-icon" src="" alt="Weather Icon">
+                <p id="date"></p>
+                <p id="temperature"></p>
+                <p id="humidity"></p>
+                <p id="description"></p>
+                <p id="wind-speed"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment.min.js"></script>
+    <script>
+        const url = 'https://api.openweathermap.org/data/2.5/weather';
+        const apiKey = 'f00c38e0279b7bc85480c3fe775d518c';
+
+        $(document).ready(function () {
+            weatherFn('Trivandrum');
+        });
+
+        async function weatherFn(cName) {
+            const endpoint = `${url}?q=${cName}&appid=${apiKey}&units=metric`;
+            try {
+                const res = await fetch(endpoint);
+                const data = await res.json();
+                if (res.ok) {
+                    weatherShowFn(data);
+                } else {
+                    alert('City not found. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+            }
+        }
+
+        function weatherShowFn(data) {
+            $('#city-name').text(data.name);
+            $('#weather-icon').attr('src', `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`);
+            $('#date').text(moment().format('MMMM Do YYYY, h:mm:ss a'));
+            $('#temperature').html(`${data.main.temp}°C`);
+            $('#humidity').html(`Humidity: ${data.main.humidity}%`);
+            $('#description').text(data.weather[0].description);
+            $('#wind-speed').html(`Wind Speed: ${data.wind.speed} m/s`);
+            $('#weather-info').fadeIn();
+        }
+
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soil Moisture Log</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f7f7f7;
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .navbar {
+            background: rgba(26, 37, 15, 0.9);
+            color: #fff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar h1 {
+            font-size: 1.4rem;
+            color: #9fff97;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            cursor: pointer;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .navbar li:hover {
+            color: #82ff62;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 0.85rem;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            font-size: 0.8rem;
+        }
+
+        .no-logs {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Mobile-responsive styles */
+        @media (max-width: 768px) {
+            .navbar h1 {
+                font-size: 1.2rem;
+            }
+
+            .navbar ul {
+                flex-direction: column;
+                gap: 5px;
+                align-items: flex-start;
+            }
+
+            .navbar li {
+                font-size: 1rem;
+            }
+
+            table {
+                font-size: 0.75rem;
+                margin-top: 20px;
+            }
+
+            th, td {
+                padding: 5px;
+            }
+
+            /* Ensure no extra space beside the NPK table */
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+                box-sizing: border-box;
+            }
+
+            /* Adjust log headings and no logs message */
+            h2 {
+                font-size: 1.2rem;
+                margin-top: 20px;
+            }
+
+            .no-logs {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Agventure Logs</h1>
+        <ul>
+            <li onclick="navigateTo('index.html')">Home</li>
+            <li onclick="navigateTo('profile.html')">Profile</li>
+            <li onclick="navigateTo('weather.html')">Weather</li>
+        </ul>
+    </nav>
+
+    <div id="logContainer">
+        <div class="table-container">
+            <h2>Soil Moisture Log</h2>
+            <table id="logTable">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Soil Moisture</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Logs will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <h2>NPK Log</h2>
+            <table id="npkLogTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Nitrogen</th>
+                        <th>Phosphorus</th>
+                        <th>Potassium</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="npkLogTableData">
+                    <!-- NPK Logs will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="noLogs" class="no-logs" style="display: none;">
+        No logs available yet.
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch('https://l3kdi8tmfl.execute-api.us-east-1.amazonaws.com/w3/w3', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const apiData = await response.json();
+                console.log('Fetched API data:', apiData);
+
+                // Parse the body field if it exists and is a string
+                const data = JSON.parse(apiData.body);
+
+                // Ensure data is an array before passing it to processLogs
+                if (Array.isArray(data)) {
+                    processLogs(data);
+                } else {
+                    console.error('Data is not iterable. Expected an array:', data);
+                }
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                alert('Failed to load logs. Please try again later.');
+            }
+        }
+
+        function processLogs(data) {
+            const logTableBody = document.querySelector('#logTable tbody');
+            const noLogsMessage = document.getElementById('noLogs');
+            const npkLogTableBody = document.querySelector('#npkLogTableData tbody');
+            let npkLogData = [];
+
+            if (data.length === 0) {
+                noLogsMessage.style.display = 'block';
+                return;
+            }
+
+            // Sort the logs based on the Timestamp in ascending order
+            data.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
+
+            data.forEach(item => {
+                const moisture = parseFloat(item.Soil_Moisture);
+                const status = moisture < 40
+                    ? "Soil moisture is low. Sprinkler is turned ON."
+                    : moisture > 70
+                        ? "Soil moisture is high. Sprinkler is turned OFF."
+                        : "Soil moisture is normal.";
+
+                const row = `
+                    <tr>
+                        <td>${item.Timestamp}</td>
+                        <td>${moisture}%</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+                logTableBody.innerHTML += row;
+
+                // NPK check for conditions
+                const nitrogen = parseFloat(item.N);
+                const phosphorus = parseFloat(item.P);
+                const potassium = parseFloat(item.K);
+                let npkStatus = [];
+                let action = "Add required fertilizers";
+
+                // Check each nutrient and append if they are low
+                if (nitrogen < 60) {
+                    npkStatus.push("Nitrogen is low");
+                }
+                if (phosphorus < 20) {
+                    npkStatus.push("Phosphorus is low");
+                }
+                if (potassium < 12) {
+                    npkStatus.push("Potassium is low");
+                }
+
+                // Only add to NPK log if there's any low nutrient
+                if (npkStatus.length > 0) {
+                    npkLogData.push({
+                        timestamp: item.Timestamp,
+                        nitrogen: nitrogen,
+                        phosphorus: phosphorus,
+                        potassium: potassium,
+                        status: npkStatus.join(", "),  // Join the low nutrients in one string
+                        action: action
+                    });
+                }
+            });
+
+            noLogsMessage.style.display = 'none';
+
+            // Show the NPK log table if any NPK data is available
+            if (npkLogData.length > 0) {
+                document.getElementById('npkLogTable').style.display = 'block';
+                populateNPKLogTable(npkLogData);
+            }
+        }
+
+        function populateNPKLogTable(npkLogData) {
+            const npkLogTableBody = document.querySelector('#npkLogTableData');
+
+            npkLogData.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.timestamp}</td>
+                        <td>${item.nitrogen}</td>
+                        <td>${item.phosphorus}</td>
+                        <td>${item.potassium}</td>
+                        <td>${item.status}</td>
+                        <td>${item.action}</td>
+                    </tr>
+                `;
+                npkLogTableBody.innerHTML += row;
+            });
+        }
+
+        // Fetch logs when the page loads
+        window.onload = fetchLogs;
+    </script>
+</body>
+</html>

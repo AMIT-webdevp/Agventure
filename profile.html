@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Data</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: #343a40;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin-left: 20px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .navbar li:hover {
+            color: #adb5bd;
+        }
+
+        .toggle-btn {
+            display: none;
+            background: #343a40;
+            color: #fff;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .toggle-btn:hover {
+            background: #495057;
+        }
+
+        .navbar ul {
+            display: flex;
+        }
+
+        .main-content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-header h2 {
+            margin-bottom: 10px;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-section h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+
+        .profile-section p {
+            margin: 5px 0;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #343a40;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 0 10px;
+        }
+
+        .actions button:hover {
+            background: #495057;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .navbar ul {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-top: 10px;
+                display: none;
+                width: 100%;
+            }
+
+            .navbar ul.active {
+                display: flex;
+            }
+
+            .toggle-btn {
+                display: block;
+            }
+
+            .main-content {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .actions button {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+         /* Larger screens (desktop styles) */
+         @media (min-width: 769px) {
+            .navbar .menu-icon {
+                display: none;
+            }
+
+            .navbar ul {
+                display: flex;
+            }
+
+            .main-content {
+                padding: 40px;
+            }
+
+            .intro {
+                font-size: 1.2rem;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-container {
+                max-width: 450px;
+                margin: 0 auto;
+            }
+
+            .buttons-container {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar h1 {
+                font-size: 20px;
+            }
+
+            .profile-header h2 {
+                font-size: 20px;
+            }
+
+            .profile-section h3 {
+                font-size: 18px;
+            }
+
+            .actions button {
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <h1>Profile</h1>
+            <button class="toggle-btn" onclick="toggleNavbar()">&#9776;</button>
+            <ul>
+                <li onclick="navigateTo('index.html')">Home</li>
+                <!-- <li onclick="navigateTo('profile.html')">Profile</li>
+                <li onclick="navigateTo('weather.html')">Weather</li> -->
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="profile-header">
+                <h2>Welcome, Sandeep!</h2>
+                <p>Your personalized profile dashboard</p>
+            </div>
+
+            <!-- Personal Details -->
+            <div class="profile-section">
+                <h3>Personal Details</h3>
+                <p><strong>Name:</strong> Sandeep</p>
+                <p><strong>Email:</strong> sandeep@gmail.com</p>
+                <p><strong>Address:</strong> 73, Lakshmi Garden</p>
+            </div>
+
+            <!-- Agricultural Preferences -->
+            <div class="profile-section">
+                <h3>Agricultural Preferences</h3>
+                <p><strong>Current Crops:</strong> Wheat</p>
+                <p><strong>Farming Type:</strong> Organic</p>
+                <p><strong>Land Size:</strong> 0.92 Acre</p>
+            </div>
+
+            <!-- Sensor Usage -->
+            <div class="profile-section">
+                <h3>Sensor Usage</h3>
+                <p><strong>Installed Sensors:</strong> 10 - Soil Moisture Sensor, 4- NPK Sensor, 4 - pH Sensor</p>
+                <p><strong>Soil Type:</strong> Loamy</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        function toggleNavbar() {
+            const navList = document.querySelector('.navbar ul');
+            navList.classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>

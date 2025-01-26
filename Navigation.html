@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agventure - Smart Farming Solutions</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(26, 37, 15, 0.5); /* Semi-transparent black background */
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease-in-out; /* Smooth transition for background changes */
+        }
+
+        .navbar:hover {
+            background: rgba(0, 0, 0, 0.7); /* Darker background on hover for better readability */
+        }
+
+        .navbar h1 {
+            font-size: 1.8rem;
+            color: #9fff97;
+            cursor: pointer;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+            margin: 0;
+        }
+
+        .navbar li {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .navbar li:hover {
+            color: #82ff62;
+        }
+
+        /* Mobile Navbar */
+        .navbar .menu-icon {
+            display: none;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+        }
+
+        .navbar .nav-links.active {
+            display: block;
+            position: absolute;
+            top: 70px;
+            left: 0;
+            background: rgba(26, 37, 15, 0.9);
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .navbar .nav-links li {
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar .menu-icon {
+                display: block;
+            }
+
+            .navbar .nav-links {
+                display: none;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .navbar .nav-links li {
+                text-align: center;
+            }
+        }
+
+        /* Hero Section with Rolling Background */
+        .hero {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            animation: rollBackground 15s infinite linear;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #9fff97;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .hero button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #fff;
+            background: #010f00;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .hero button:hover {
+            background: #9fff97;
+        }
+
+        /* Rolling Background Animation */
+        @keyframes rollBackground {
+            0% {
+                background: url('https://mvpfinalbuc.s3.us-east-1.amazonaws.com/Images/projectimages/bg.jpg') no-repeat center center/cover;
+            }
+
+            33% {
+                background: url('https://mvpfinalbuc.s3.us-east-1.amazonaws.com/Images/projectimages/a3.png') no-repeat center center/cover;
+            }
+
+            66% {
+                background: url('https://mvpfinalbuc.s3.us-east-1.amazonaws.com/Images/projectimages/bg.jpg') no-repeat center center/cover;
+            }
+
+            100% {
+                background: url('https://mvpfinalbuc.s3.us-east-1.amazonaws.com/Images/projectimages/a3.png') no-repeat center center/cover;
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 80px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #f8f9fa;
+        }
+
+        .intro {
+            margin-bottom: 50px;
+            max-width: 800px;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        /* Grid Section */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>Agventure</h1>
+        <span class="menu-icon" onclick="toggleMenu()">☰</span>
+        <ul class="nav-links">
+            <li onclick="navigateTo('index.html')">Home</li>
+            <li onclick="navigateTo('profile.html')">Profile</li>
+            <li onclick="navigateTo('weather.html')">Weather</li>
+            <!-- <li onclick="navigateTo('Soil_moisture.html')">Soil Moisture</li> 
+            <li onclick="navigateTo('log.html')">Sprinkler</li> -->
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Smart Farming Starts Here</h1>
+            <p>Transform your agricultural practices with cutting-edge technology. Monitor soil, water, and weather to maximize efficiency and sustainability.</p>
+            <!-- <button onclick="navigateTo('landsize.html')">Get Started</button>  -->
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="intro">
+            <h2>About Agventure</h2>
+            <p>We bring the future of farming to your doorstep. With our innovative tools, monitor soil health, optimize irrigation, and stay updated with real-time weather conditions.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card" onclick="navigateTo('small-scale.html')">
+                <!-- <img src="https://source.unsplash.com/400x300/?farm,irrigation" alt="Irrigation"> -->
+                <h3>Small Scale</h3>
+                <p>Customized for small scale farmers</p>
+            </div>
+            <div class="card" onclick="navigateTo('large-scale.html')">
+                <!-- <img src="https://source.unsplash.com/400x300/?soil,technology" alt="Soil Analysis"> -->
+                <h3>Large Scale</h3>
+                <p>Customized for large scale farmers</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Function to navigate to different pages
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // Function to toggle the mobile menu
+        function toggleMenu() {
+            const menu = document.querySelector('.nav-links');
+            menu.classList.toggle('active');
+        }
+    </script>
+</body>
+
+</html>
